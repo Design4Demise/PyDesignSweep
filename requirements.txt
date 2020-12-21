@@ -1,0 +1,6 @@
+numpy
+scipy
+matplotlib
+seaborn
+-e git+https://github.com/Design4Demise/PyExcelAnalysis#egg=pyxcel
+-e git+http://github.com/danielkelshaw/PySwallow#egg=pyswallow
