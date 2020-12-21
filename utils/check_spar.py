@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 
 
-def check_spar(filename: str, chord_length: float, h: float, b: float, htol: float, btol: float) -> bool:
+def check_spar(filename: str, chord_length: float, h: float, b: float, htol: float, btol: float):
 
     """Checks if spar fits in aerofoil geometry.
 
@@ -29,7 +29,7 @@ def check_spar(filename: str, chord_length: float, h: float, b: float, htol: flo
 
     Returns
     -------
-    bool
+    fits: bool
         True if spar fits, False otherwise
     """
 
@@ -49,25 +49,30 @@ def check_spar(filename: str, chord_length: float, h: float, b: float, htol: flo
     arr_upper, arr_lower = np.split(af, [np.argmin(af[:, 0])])
     arr_upper = np.flipud(arr_upper)
 
-    if b > chord_length or h > (np.max(np.abs(arr_upper[:, 1] - arr_lower[1:, 1]))):
-        return False
-
     # provide linear interpolations
     od_interp_upper = interpolate.interp1d(arr_upper[:, 0], arr_upper[:, 1])
     od_interp_lower = interpolate.interp1d(arr_lower[:, 0], arr_lower[:, 1])
+    
+    xdisc = np.linspace(
+        max(min(arr_upper[:, 0]), min(arr_lower[:, 0])), 
+        min(max(arr_upper[:, 0]), max(arr_upper[:, 0])), 
+        100
+    )
+    
+    upper_y = od_interp_upper(xdisc)
+    lower_y = od_interp_lower(xdisc)
+    
+    if b > chord_length or b > np.max(np.abs(upper_y - lower_y)):
+        return False
 
-    max_b = np.max(arr_upper[:, 1])
-    min_b = np.min(arr_lower[:, 1])
+    loc_max_h = np.argmax(np.abs(upper_y - lower_y))
 
-    loc_max_h = np.argmax(np.abs(arr_upper[:, 1] - arr_lower[1:, 1]))
-
-    x_hmax = arr_upper[loc_max_h][0]
-    yc_hmax = 0.5 * (arr_upper[loc_max_h][1] + arr_lower[loc_max_h][1])
-
-    # calculate bounds
+    x_hmax = xdisc[loc_max_h]
+    yc_hmax = 0.5 * (upper_y[loc_max_h] + lower_y[loc_max_h])
+    
     lb_b, ub_b = [x_hmax + i * b / 2 for i in [-1, 1]]
     lb_h, ub_h = [yc_hmax + i * h / 2 for i in [-1, 1]]
-
+    
     for h_bound in [ub_h, lb_h]:
         for b_bound in [ub_b, lb_b]:
             if not h_bound < od_interp_upper(b_bound) and h_bound > od_interp_lower(b_bound):
