@@ -49,7 +49,7 @@ def check_spar(filename: str, chord_length: float, h: float, b: float, htol: flo
     arr_upper, arr_lower = np.split(af, [np.argmin(af[:, 0])])
     arr_upper = np.flipud(arr_upper)
 
-    if b > chord_length or b > (np.max(np.diff(arr_upper[:, 1] - arr_lower[1:, 1]))):
+    if b > chord_length or h > (np.max(np.diff(arr_upper[:, 1] - arr_lower[1:, 1]))):
         return False
 
     # provide linear interpolations
