@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 
 
-def check_spar(filename: str, chord_length: float, h: float, b: float, htol: float, btol: float):
+def check_spar(aerofoil: np.ndarray, chord_length: float, h: float, b: float, htol: float, btol: float):
 
     """Checks if spar fits in aerofoil geometry.
 
@@ -33,20 +33,15 @@ def check_spar(filename: str, chord_length: float, h: float, b: float, htol: flo
         True if spar fits, False otherwise
     """
 
-    try:
-        af = np.loadtxt(filename, skiprows=1, delimiter=',')
-    except ValueError:
-        raise ValueError('Please ensure appropriate file format.')
-
     # scale aerofoil
-    af *= chord_length
+    aerofoil *= chord_length
 
     # add tolerances
     b += 2 * btol
     h += 2 * htol
 
     # split aerofoil into upper/lower surfaces
-    arr_upper, arr_lower = np.split(af, [np.argmin(af[:, 0])])
+    arr_upper, arr_lower = np.split(aerofoil, [np.argmin(aerofoil[:, 0])])
     arr_upper = np.flipud(arr_upper)
 
     # provide linear interpolations
