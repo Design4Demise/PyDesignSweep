@@ -34,14 +34,14 @@ def check_spar(aerofoil: np.ndarray, chord_length: float, h: float, b: float, ht
     """
 
     # scale aerofoil
-    aerofoil *= chord_length
+    af = aerofoil*chord_length
 
     # add tolerances
     b += 2 * btol
     h += 2 * htol
 
     # split aerofoil into upper/lower surfaces
-    arr_upper, arr_lower = np.split(aerofoil, [np.argmin(aerofoil[:, 0])])
+    arr_upper, arr_lower = np.split(af, [np.argmin(af[:, 0])])
     arr_upper = np.flipud(arr_upper)
 
     # provide linear interpolations
@@ -50,7 +50,7 @@ def check_spar(aerofoil: np.ndarray, chord_length: float, h: float, b: float, ht
     
     xdisc = np.linspace(
         max(min(arr_upper[:, 0]), min(arr_lower[:, 0])), 
-        min(max(arr_upper[:, 0]), max(arr_upper[:, 0])), 
+        min(max(arr_upper[:, 0]), max(arr_lower[:, 0])),
         100
     )
     
